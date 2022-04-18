@@ -77,6 +77,16 @@ sudo bpftrace -e 'kfunc:vmx_vcpu_run { printf("kfunc:vmx_vcpu_run: %s  %016lx\n"
     entry_SYSCALL_64_after_hwframe+68
 ]: 41918301
 
+
+sudo bpftrace -e 'kfunc:kvm_set_cr3 { printf("kfunc:kvm_set_cr3: %s  %016lx  %016lx\n", comm, args->vcpu, args->cr3); @f[kstack()] = count();}'
+
+
+sudo bpftrace -e 'kfunc:kvm_set_cr3 { printf("kfunc:kvm_set_cr3: %s  %016lx  %016lx\n", comm, args->vcpu, args->cr3); @f[kstack()] = count();}  kfunc:vmx_load_mmu_pgd { printf("kfunc:vmx_load_mmu_pgd: %s  %016lx  %016lx  %d\n", comm, args->vcpu, args->root_hpa, args->root_level);  @b[kstack()] = count();  }    kfunc:kvm_mmu_load {printf("kfunc:kvm_mmu_load: %s  %016lx\n", comm, args->vcpu);  @c[kstack()] = count();   }'
+
+
+
+sudo bpftrace -e 'kfunc:kvm_mmu_reset_context{ printf("kvm_mmu_reset_context:%s %016lx\n", comm, args->vcpu); @[kstack()] = count();}'
+
 ```
 
 
