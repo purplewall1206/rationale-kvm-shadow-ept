@@ -9,7 +9,9 @@ kvm，死循环进入guest，直到exit退出，最重要的路径是 **kvm_vcpu
 
 理解这个几乎理解的kvm
 
+**所有增加的代码，标记_shadowx在后面，shadow的部分只有pte和root_hpa，不包括任何基础设施**
 
+shadow的pte对应的`kvm_mmu_page`基础设施可以通过`sptep_to_sp()`找到，实现方法是shadow pte的`struct page->private`在创建时也指向`kvm_mmu_page`
 
 新的小办法，能不能在原有kvm_mmu上面改动，而非增加新的kvm_mmu
 
