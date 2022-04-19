@@ -10,6 +10,19 @@ kvm，死循环进入guest，直到exit退出，最重要的路径是 **kvm_vcpu
 理解这个几乎理解的kvm
 
 
+
+新的小办法，能不能在原有kvm_mmu上面改动，而非增加新的kvm_mmu
+
+具体来说，增加新的`root_hpa`，在所有kvm_mmu_page的地方，甚至对应具体页表的里面，直接增加一个page，那么只要有ept的地方，就自然包含了一个shadow ept
+
+那么我们只需要考虑怎么把新的页表连接到一起即可
+
+这个猜测基本靠谱，具体做法是 依赖`kvm_mmu_page`提供的一切基础设施，直接在上面设置 `spt_shadowx`，__get_free_page和free_page分配释放
+
+下面研究下怎么组织页表即可
+
+
+
 # ept pgd 到底load了多少次
 
 ```
