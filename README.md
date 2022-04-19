@@ -22,6 +22,14 @@ kvm，死循环进入guest，直到exit退出，最重要的路径是 **kvm_vcpu
 下面研究下怎么组织页表即可
 
 
+# 细节注意点
+`tdp_enabled(true)` 和 `tdp_mmu_enabled(false)` 是两个控制，其中后者并不使用，注意tdp_mmu相关的除了init和page_fault其他几乎都没使用
+
+例如`is_tdp_mmu_root`函数默认返回false
+
+页表遍历过程中的 `shadow` 指的是下级页表，比如 `for_each_shadow_entry(`
+
+
 
 # ept pgd 到底load了多少次
 
