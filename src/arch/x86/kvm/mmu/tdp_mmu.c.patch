@@ -1,0 +1,45 @@
+--- /home/wangzc/Desktop/experiment/linux-source-5.13.0/arch/x86/kvm/mmu/tdp_mmu.c	2022-03-24 23:34:38.000000000 +0800
++++ /home/wangzc/Desktop/experiment/linux-source-5.13.0-kvm-shadow-ept/arch/x86/kvm/mmu/tdp_mmu.c	2022-04-19 09:58:27.104410874 +0800
+@@ -215,6 +215,42 @@
+ 	return __pa(root->spt);
+ }
+ 
++
++// ========================================================
++
++// hpa_t kvm_tdp_mmu_get_vcpu_root_hpa_shadowx(struct kvm_vcpu *vcpu)
++// {
++// 	union kvm_mmu_page_role role;
++// 	// struct kvm *kvm = vcpu->kvm;
++// 	struct kvm_mmu_page *root;
++
++// 	// lockdep_assert_held_write(&kvm->mmu_lock);
++
++// 	role = page_role_for_level(vcpu, vcpu->arch.mmu->shadow_root_level);
++
++// 	/* Check for an existing root before allocating a new one. */
++// 	// for_each_tdp_mmu_root(kvm, root, kvm_mmu_role_as_id(role)) {
++// 	// 	if (root->role.word == role.word &&
++// 	// 	    kvm_tdp_mmu_get_root(kvm, root))
++// 	// 		goto out;
++// 	// }
++// 	if (vcpu->arch.mmu_shadowx->root_hpa != INVALID_PAGE || vcpu->arch.mmu_shadowx->root_hpa != 0) {
++// 		free_page(vcpu->arch.mmu_shadowx->root_hpa);
++// 	}
++// 	root = alloc_tdp_mmu_page(vcpu, 0, vcpu->arch.mmu->shadow_root_level);
++// 	// refcount_set(&root->tdp_mmu_root_count, 1);
++
++// 	// spin_lock(&kvm->arch.tdp_mmu_pages_lock);
++// 	// list_add_rcu(&root->link, &kvm->arch.tdp_mmu_roots);
++// 	// spin_unlock(&kvm->arch.tdp_mmu_pages_lock);
++
++// // out:
++// 	return __pa(root->spt);
++// }
++
++// ========================================================
++
++
+ static void handle_changed_spte(struct kvm *kvm, int as_id, gfn_t gfn,
+ 				u64 old_spte, u64 new_spte, int level,
+ 				bool shared);

@@ -1,0 +1,92 @@
+--- /home/wangzc/Desktop/experiment/linux-source-5.13.0/arch/x86/kvm/vmx/vmx.c	2022-03-24 23:34:38.000000000 +0800
++++ /home/wangzc/Desktop/experiment/linux-source-5.13.0-kvm-shadow-ept/arch/x86/kvm/vmx/vmx.c	2022-04-19 10:12:43.044665300 +0800
+@@ -3166,6 +3166,8 @@
+ 		eptp |= VMX_EPTP_AD_ENABLE_BIT;
+ 	eptp |= root_hpa;
+ 
++	// pr_info("contruct_eptp: %016lx  %016lx  %016lx\n", (unsigned long)vcpu, (unsigned long) root_hpa, (unsigned long) eptp);
++
+ 	return eptp;
+ }
+ 
+@@ -3176,11 +3178,23 @@
+ 	bool update_guest_cr3 = true;
+ 	unsigned long guest_cr3;
+ 	u64 eptp;
++	u64 eptp_list_address;
++	u64 *eptps;
+ 
+ 	if (enable_ept) {
+ 		eptp = construct_eptp(vcpu, root_hpa, root_level);
+ 		vmcs_write64(EPT_POINTER, eptp);
+ 
++		// ====================================================
++		eptp_list_address = vmcs_read64(EPTP_LIST_ADDRESS);
++		eptps = (u64 *) phys_to_virt(eptp_list_address);
++		eptps[0] = eptp;
++		eptps[1] = eptp;
++		// pr_info("vmx_load_mmu_pgd ept_pointer:       %016lx  %016lx  %016lx\n", (unsigned long)eptp, (unsigned long)vcpu->arch.walk_mmu->root_hpa, (unsigned long)vcpu->arch.walk_mmu->root_hpa);
++		// pr_info("eptp_list_address: %016lx\n",  (unsigned long)eptp_list_address);
++		// pr_info("eptps(virt):       %016lx\n", (unsigned long)eptps);
++
++		// ====================================================
+ 		hv_track_root_ept(vcpu, root_hpa);
+ 
+ 		if (!enable_unrestricted_guest && !is_paging(vcpu))
+@@ -4346,6 +4360,8 @@
+  */
+ static void init_vmcs(struct vcpu_vmx *vmx)
+ {
++	unsigned long *eptps;
++	unsigned long ept_pointer;
+ 	if (nested)
+ 		nested_vmx_set_vmcs_shadowing_bitmap();
+ 
+@@ -4392,8 +4408,20 @@
+ 	vmcs_writel(HOST_FS_BASE, 0); /* 22.2.4 */
+ 	vmcs_writel(HOST_GS_BASE, 0); /* 22.2.4 */
+ 
+-	if (cpu_has_vmx_vmfunc())
+-		vmcs_write64(VM_FUNCTION_CONTROL, 0);
++	// if (cpu_has_vmx_vmfunc())
++	// 	vmcs_write64(VM_FUNCTION_CONTROL, 0);
++	// --------------- vm_function_enable-----------------------
++	if (cpu_has_vmx_vmfunc()) {
++		// vmcs_write64();
++		vmcs_write64(VM_FUNCTION_CONTROL, 1);
++		eptps = (unsigned long *) __get_free_page(GFP_KERNEL);
++		ept_pointer = vmcs_read64(EPT_POINTER);
++		pr_info("============== init vmcs: ept_pointer %016lx =========== eptps: %016lx %016lx\n", ept_pointer,  (unsigned long)eptps, (unsigned long)virt_to_phys(eptps));
++		eptps[0] = ept_pointer;
++		eptps[1] = ept_pointer;
++		vmcs_write64(EPTP_LIST_ADDRESS, virt_to_phys(eptps));
++	}
++		
+ 
+ 	vmcs_write32(VM_EXIT_MSR_STORE_COUNT, 0);
+ 	vmcs_write32(VM_EXIT_MSR_LOAD_COUNT, 0);
+@@ -5754,6 +5782,9 @@
+ 	u32 cpu_based_exec_ctrl, pin_based_exec_ctrl, secondary_exec_control;
+ 	unsigned long cr4;
+ 	int efer_slot;
++	unsigned long vm_function_control;
++	unsigned long eptp_list_address;
++	unsigned long *eptps;
+ 
+ 	if (!dump_invalid_vmcs) {
+ 		pr_warn_ratelimited("set kvm_intel.dump_invalid_vmcs=1 to dump internal KVM state.\n");
+@@ -5909,8 +5940,13 @@
+ 	if (secondary_exec_control & SECONDARY_EXEC_ENABLE_VPID)
+ 		pr_err("Virtual processor ID = 0x%04x\n",
+ 		       vmcs_read16(VIRTUAL_PROCESSOR_ID));
++	vm_function_control = vmcs_read64(VM_FUNCTION_CONTROL);
++	eptp_list_address = vmcs_read64(EPTP_LIST_ADDRESS);
++	eptps = (unsigned long *) phys_to_virt(eptp_list_address);
++	pr_err("VM FUNCTION CONTROL %016lx\n", vm_function_control);
++	pr_err("EPTP_LIST_ADDRESS %016lx %016lx %016lx\n", eptp_list_address, eptps[0], eptps[1]);
+ }
+-
++EXPORT_SYMBOL_GPL(dump_vmcs);
+ /*
+  * The guest has exited.  See if we can fix it or if we need userspace
+  * assistance.

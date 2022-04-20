@@ -1,0 +1,28 @@
+--- /home/wangzc/Desktop/experiment/linux-source-5.13.0/arch/x86/include/asm/kvm_host.h	2022-03-24 23:34:38.000000000 +0800
++++ /home/wangzc/Desktop/experiment/linux-source-5.13.0-kvm-shadow-ept/arch/x86/include/asm/kvm_host.h	2022-04-19 10:13:27.665347460 +0800
+@@ -386,6 +386,11 @@
+ 			 struct kvm_mmu_page *sp);
+ 	void (*invlpg)(struct kvm_vcpu *vcpu, gva_t gva, hpa_t root_hpa);
+ 	hpa_t root_hpa;
++
++	// =======================
++	hpa_t root_hpa_shadowx;
++	// =======================
++
+ 	gpa_t root_pgd;
+ 	union kvm_mmu_role mmu_role;
+ 	u8 root_level;
+@@ -631,6 +636,13 @@
+ 	 */
+ 	struct kvm_mmu *walk_mmu;
+ 
++
++	// struct kvm_mmu root_mmu_shadowx;
++
++	// struct kvm_mmu *mmu_shadowx;
++
++	// struct kvm_mmu *walk_mmu_shadowx;
++
+ 	struct kvm_mmu_memory_cache mmu_pte_list_desc_cache;
+ 	struct kvm_mmu_memory_cache mmu_shadow_page_cache;
+ 	struct kvm_mmu_memory_cache mmu_gfn_array_cache;

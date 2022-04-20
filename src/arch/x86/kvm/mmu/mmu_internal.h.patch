@@ -1,0 +1,10 @@
+--- /home/wangzc/Desktop/experiment/linux-source-5.13.0/arch/x86/kvm/mmu/mmu_internal.h	2021-06-28 06:21:11.000000000 +0800
++++ /home/wangzc/Desktop/experiment/linux-source-5.13.0-kvm-shadow-ept/arch/x86/kvm/mmu/mmu_internal.h	2022-04-19 11:02:28.915867288 +0800
+@@ -48,6 +48,7 @@
+ 	gfn_t gfn;
+ 
+ 	u64 *spt;
++	u64 *spt_shadowx;
+ 	/* hold the gfn of each spte inside spt */
+ 	gfn_t *gfns;
+ 	/* Currently serving as active root */

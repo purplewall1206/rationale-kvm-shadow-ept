@@ -5,6 +5,10 @@
 ![xelatex KVM-KVM相关](https://blog.csdn.net/xelatex_kvm/category_1823953.html)
 
 
+基于版本是ubuntu提供的*linux-source-5.13.0*
+
+具体修改的patch在 [src](./src)目录下
+
 kvm，死循环进入guest，直到exit退出，最重要的路径是 **kvm_vcpu_ioctl -> kvm_arch_vcpu_ioctl_run -> vcpu_run（死循环） -> vcpu_enter_guest(arch/x86/kvm/x86.c死循环)**
 
 理解这个几乎理解的kvm

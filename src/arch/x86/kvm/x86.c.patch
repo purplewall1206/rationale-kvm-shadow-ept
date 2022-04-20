@@ -1,0 +1,67 @@
+--- /home/wangzc/Desktop/experiment/linux-source-5.13.0/arch/x86/kvm/x86.c	2022-03-24 23:34:38.000000000 +0800
++++ /home/wangzc/Desktop/experiment/linux-source-5.13.0-kvm-shadow-ept/arch/x86/kvm/x86.c	2022-04-19 10:00:28.577816814 +0800
+@@ -30,6 +30,7 @@
+ #include "hyperv.h"
+ #include "lapic.h"
+ #include "xen.h"
++#include "vmx/vmx.h"
+ 
+ #include <linux/clocksource.h>
+ #include <linux/interrupt.h>
+@@ -8408,6 +8409,8 @@
+ int kvm_emulate_halt(struct kvm_vcpu *vcpu)
+ {
+ 	int ret = kvm_skip_emulated_instruction(vcpu);
++	// dump_vmcs(vcpu);
++	// pr_info("------------------- kvm_emulate_halt -------------------------\n");
+ 	/*
+ 	 * TODO: we might be squashing a GUESTDBG_SINGLESTEP-triggered
+ 	 * KVM_EXIT_DEBUG here.
+@@ -8524,6 +8527,24 @@
+ 	return;
+ }
+ 
++void kvm_custom_hypercall(struct kvm_vcpu *vcpu)
++{
++	// unsigned long eptp_list_address;
++	// unsigned long *eptps;
++	// unsigned long ept_pointer;
++
++	// ept_pointer = vmcs_read64(EPT_POINTER);
++	// eptp_list_address = vmcs_read64(EPTP_LIST_ADDRESS);
++	// eptps = (unsigned long *) phys_to_virt(eptp_list_address);
++	// eptps[0] = ept_pointer;
++	// eptps[1] = ept_pointer;
++
++	pr_info("=============kvm custom hypercall ==============\n");
++	// pr_info("ept_pointer:       %016lx\n", ept_pointer);
++	// pr_info("eptp_list_address: %016lx\n", eptp_list_address);
++	// pr_info("eptps(virt):       %016lx\n", (unsigned long)eptps);
++}
++
+ int kvm_emulate_hypercall(struct kvm_vcpu *vcpu)
+ {
+ 	unsigned long nr, a0, a1, a2, a3, ret;
+@@ -8589,6 +8610,14 @@
+ 		kvm_sched_yield(vcpu, a0);
+ 		ret = 0;
+ 		break;
++
++	case KVM_HC_HELLO_HYPERCALL:
++		pr_info("HELLO HYPERCALL\n");
++		dump_vmcs(vcpu);
++		// kvm_emulate_hypercall(vcpu);
++		ret = 0;
++		break;
++
+ 	default:
+ 		ret = -KVM_ENOSYS;
+ 		break;
+@@ -9400,6 +9429,7 @@
+ 	}
+ 
+ 	r = kvm_mmu_reload(vcpu);
++	// pr_info("vcpu_enter_guest: %016lx  %016lx  %016lx\n", (unsigned long) vcpu, (unsigned long) vcpu->arch.mmu->root_hpa, (unsigned long) vcpu->arch.mmu_shadowx->root_hpa);
+ 	if (unlikely(r)) {
+ 		goto cancel_injection;
+ 	}

@@ -1,0 +1,11 @@
+--- /home/wangzc/Desktop/experiment/linux-source-5.13.0/arch/x86/kvm/mmu/tdp_mmu.h	2022-03-24 23:34:38.000000000 +0800
++++ /home/wangzc/Desktop/experiment/linux-source-5.13.0-kvm-shadow-ept/arch/x86/kvm/mmu/tdp_mmu.h	2022-04-19 09:58:30.904445863 +0800
+@@ -7,6 +7,8 @@
+ 
+ hpa_t kvm_tdp_mmu_get_vcpu_root_hpa(struct kvm_vcpu *vcpu);
+ 
++// hpa_t kvm_tdp_mmu_get_vcpu_root_hpa_shadowx(struct kvm_vcpu *vcpu);
++
+ __must_check static inline bool kvm_tdp_mmu_get_root(struct kvm *kvm,
+ 						     struct kvm_mmu_page *root)
+ {
