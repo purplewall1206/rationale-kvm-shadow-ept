@@ -1,0 +1,36 @@
+--- ../linux-4.19.239/fs/inode.c        2022-04-20 15:12:51.000000000 +0800
++++ fs/inode.c  2022-04-29 17:19:47.178970974 +0800
+@@ -66,6 +66,33 @@
+ };
+ EXPORT_SYMBOL(empty_aops);
+ 
++void SYNC_INODE(struct inode *origin, struct inode *shadow)
++{
++       shadow->i_mode = origin->i_mode;
++       shadow->i_opflags = origin->i_opflags;
++       shadow->i_uid = origin->i_uid;
++       shadow->i_gid = origin->i_gid;
++       shadow->i_flags = origin->i_flags;
++       shadow->i_op = origin->i_op;
++       shadow->i_sb = origin->i_sb;
++       shadow->i_mapping = origin->i_mapping;
++       shadow->i_rdev = origin->i_rdev;
++       shadow->i_size = origin->i_size;
++       shadow->i_atime = origin->i_atime;
++       shadow->i_mtime = origin->i_mtime;
++       shadow->i_ctime = origin->i_ctime;
++       shadow->i_bytes = origin->i_bytes;
++       shadow->i_blkbits = origin->i_blkbits;
++       shadow->i_write_hint = origin->i_write_hint;
++       shadow->i_blocks = origin->i_blocks;
++       shadow->i_state = origin->i_state;
++       shadow->i_fop = origin->i_fop;
++       shadow->i_flctx = origin->i_flctx;
++       shadow->i_generation = origin->i_generation;
++       shadow->i_private = origin->i_private;
++}
++EXPORT_SYMBOL(SYNC_INODE)
++
+ /*
+  * Statistics gathering..
+  */

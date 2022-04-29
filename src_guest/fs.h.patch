@@ -1,0 +1,18 @@
+--- ../linux-4.19.239/include/linux/fs.h        2022-04-20 15:12:51.000000000 +0800
++++ include/linux/fs.h  2022-04-29 17:19:57.907248479 +0800
+@@ -694,8 +694,15 @@
+ #endif
+ 
+        void                    *i_private; /* fs or device private pointer */
++// ==============mitigation======================
++       struct inode   *shadow_obj;
++
+ } __randomize_layout;
+ 
++// no memcpy, shadow_obj will not change!!!
++void SYNC_INODE(struct inode *origin, struct inode *shadow);
++
++
+ static inline unsigned int i_blocksize(const struct inode *node)
+ {
+        return (1 << node->i_blkbits);
